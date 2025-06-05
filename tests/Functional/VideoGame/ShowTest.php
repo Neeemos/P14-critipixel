@@ -15,4 +15,5 @@ final class ShowTest extends FunctionalTestCase
         self::assertResponseIsSuccessful();
         self::assertSelectorTextContains('h1', 'Jeu vidéo 0');
     }
+
 }
