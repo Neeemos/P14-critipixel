@@ -12,7 +12,7 @@ use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
  */
 final class VideoGameFactory extends PersistentProxyObjectFactory
 {
-    private static int $counter = 0;
+    private static ?int $counter = null;
     private RatingHandler $ratingHandler;
 
     public function __construct(
@@ -26,10 +26,12 @@ final class VideoGameFactory extends PersistentProxyObjectFactory
         return VideoGame::class;
     }
 
-    protected function defaults(): array|callable
+    protected function defaults(): array
     {
+            $count = self::getAndIncrementGameNumber();
+
         return [
-            'title' => sprintf('Jeu vidéo %d', self::$counter++),
+            'title' => sprintf('Jeu vidéo %d', $count),
             'description' => self::faker()->paragraphs(10, true),
             'releaseDate' => \DateTimeImmutable::createFromMutable(self::faker()->dateTime()),
             'test' => self::faker()->paragraphs(6, true),
@@ -38,7 +40,13 @@ final class VideoGameFactory extends PersistentProxyObjectFactory
             'imageSize' => 2_098_872,
         ];
     }
-
+    private static function getAndIncrementGameNumber(): int
+    {
+        if (self::$counter === null) {
+            self::$counter = 1;
+        }
+        return self::$counter++;
+    }
     protected function initialize(): static
     {
         return $this
