@@ -44,6 +44,9 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
+        
+      - name: Clear cache for test env
+        run: php bin/console cache:clear --env=test
 
       - name: Run test suite
         run: composer run test
