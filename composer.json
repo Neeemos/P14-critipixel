@@ -1,4 +1,6 @@
 {
+    "name": "criti-pixel/app",
+    "description": "Application Symfony CritiPixel",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
