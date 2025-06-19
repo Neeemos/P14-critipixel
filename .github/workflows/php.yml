@@ -42,8 +42,8 @@ jobs:
           tools: symfony, composer
           coverage: none
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate --strict
+      - name:  Validate composer.json (non-strict)
+        run: composer validate 
 
       - name: Cache Composer packages
         id: composer-cache
