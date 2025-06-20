@@ -44,6 +44,8 @@ jobs:
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
+      - name: Build Sass css
+        run: symfony console sass:build
         
       - name: Clear cache for test env
         run: php bin/console cache:clear --env=test
