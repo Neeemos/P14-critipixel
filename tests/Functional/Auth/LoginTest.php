@@ -12,7 +12,7 @@ final class LoginTest extends FunctionalTestCase
     public function testThatLoginShouldSucceeded(): void
     {
         $this->get('/auth/login');
-
+        $this->assertResponseIsSuccessful();
         $this->client->submitForm('Se connecter', [
             'email' => 'user+1@email.com',
             'password' => 'password'
