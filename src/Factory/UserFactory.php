@@ -4,16 +4,26 @@ namespace App\Factory;
 
 use App\Model\Entity\User;
 use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
+use Zenstruck\Foundry\Proxy;
 
+/**
+ * @extends PersistentProxyObjectFactory<User>
+ */
 final class UserFactory extends PersistentProxyObjectFactory
 {
-    private static ?int $userCount = null;
+    private static int $userCount;
+
+    public function __construct()
+    {
+        self::$userCount = 0;
+    }
 
     public static function class(): string
     {
         return User::class;
     }
 
+    /** @return array<string, mixed> ***/
     protected function defaults(): array
     {
         $count = self::getAndIncrementUserCount();
@@ -27,14 +37,11 @@ final class UserFactory extends PersistentProxyObjectFactory
 
     private static function getAndIncrementUserCount(): int
     {
-        if (self::$userCount === null) {
-            self::$userCount = 0;
-        }
         return self::$userCount++;
     }
+
     protected function initialize(): static
     {
-        return $this
-            ->afterInstantiate(function (User $user): void {});
+        return $this;
     }
 }

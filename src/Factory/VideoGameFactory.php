@@ -12,7 +12,8 @@ use Zenstruck\Foundry\Persistence\PersistentProxyObjectFactory;
  */
 final class VideoGameFactory extends PersistentProxyObjectFactory
 {
-    private static ?int $counter = null;
+    /** @var int */
+    private static int $counter;
     private RatingHandler $ratingHandler;
 
     public function __construct(
@@ -25,10 +26,10 @@ final class VideoGameFactory extends PersistentProxyObjectFactory
     {
         return VideoGame::class;
     }
-
+   /** @return array<string, mixed> ***/
     protected function defaults(): array
     {
-            $count = self::getAndIncrementGameNumber();
+        $count = self::getAndIncrementGameNumber();
 
         return [
             'title' => sprintf('Jeu vidéo %d', $count),
@@ -40,11 +41,16 @@ final class VideoGameFactory extends PersistentProxyObjectFactory
             'imageSize' => 2_098_872,
         ];
     }
+    private static function initializeCounter(): void
+    {
+        if (!isset(self::$counter)) {
+            self::$counter = 0;
+        }
+    }
+
     private static function getAndIncrementGameNumber(): int
     {
-        if (self::$counter === null) {
-            self::$counter = 1;
-        }
+        self::initializeCounter();
         return self::$counter++;
     }
     protected function initialize(): static

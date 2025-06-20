@@ -26,7 +26,7 @@ final class NumberOfRatingPerValueFactory extends ObjectFactory
 
     /**
      * @see https://symfony.com/bundles/ZenstruckFoundryBundle/current/index.html#model-factories
-     *
+     * @return array<string, mixed>
      * @todo add your default values here
      */
     protected function defaults(): array
