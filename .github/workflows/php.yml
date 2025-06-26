@@ -1,13 +1,16 @@
-name: Run Symfony Tests
+name: Symfony CI
 
 on:
   push:
-    branches: ["main"]
+    branches: [ "main" ]
   pull_request:
-    branches: ["main"]
+    branches: [ "main" ]
+
+permissions:
+  contents: read
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
 
     services:
@@ -16,41 +19,59 @@ jobs:
         env:
           POSTGRES_USER: symfony
           POSTGRES_PASSWORD: symfony
-          POSTGRES_DB: criti-pixel
         ports: ['5432:5432']
         options: >-
-          --health-cmd="pg_isready -U symfony"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=5
-
-    env:
-      DATABASE_URL: "postgresql://symfony:symfony@localhost:5432/criti-pixel"
-      APP_ENV: test
-      SYMFONY_DEPRECATIONS_HELPER: disabled
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install Symfony CLI
-        run: curl -sS https://get.symfony.com/cli/installer | bash && mv ~/.symfony*/bin/symfony /usr/local/bin/symfony
-
-      - name: Setup PHP
+      - name: Setup PHP with extensions
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: mbstring, intl, pdo_pgsql
+          extensions: pdo_pgsql
+          tools: symfony, composer
           coverage: none
 
-      - name: Install Composer dependencies
-        run: composer install --prefer-dist --no-progress
-      - name: Build Sass css
-        run: symfony console sass:build
-        
-      - name: Clear cache for test env
-        run: php bin/console cache:clear --env=test
+      - name: Validate composer.json and composer.lock
+        run: composer validate
 
-      - name: Run test suite
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Install dependencies
+        run: composer install --prefer-dist --no-progress
+
+      - name: Generate random .env.test file
+        run: |
+          DB_NAME="testdb_$RANDOM"
+          APP_SECRET="$(openssl rand -hex 16)"
+          
+          echo "KERNEL_CLASS='App\\Kernel'" > .env.test
+          echo "APP_SECRET=$APP_SECRET" >> .env.test
+          echo "SYMFONY_DEPRECATIONS_HELPER=999999" >> .env.test
+          echo "PANTHER_APP_ENV=panther" >> .env.test
+          echo "PANTHER_ERROR_SCREENSHOT_DIR=./var/error-screenshots" >> .env.test
+          echo "DATABASE_URL=postgresql://symfony:symfony@localhost:5432/$DB_NAME" >> .env.test
+
+          echo "Creating PostgreSQL test database: $DB_NAME"
+          export PGPASSWORD=symfony
+          psql -h localhost -U symfony -c "CREATE DATABASE \"$DB_NAME\";"
+        env:
+          PGPASSWORD: symfony
+
+      - name: Run tests
         run: composer run test
 
       - name: Run PHPStan static analysis
