@@ -1,16 +1,13 @@
-name: Symfony CI
+name: Run Symfony Tests
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
-
-permissions:
-  contents: read
+    branches: ["main"]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     services:
@@ -19,40 +16,40 @@ jobs:
         env:
           POSTGRES_USER: symfony
           POSTGRES_PASSWORD: symfony
+          POSTGRES_DB: criti-pixel
         ports: ['5432:5432']
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U symfony"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      DATABASE_URL: "postgresql://symfony:symfony@localhost:5432/criti-pixel"
+      APP_ENV: test
+      SYMFONY_DEPRECATIONS_HELPER: disabled
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup PHP with extensions
+      - name: Install Symfony CLI
+        run: curl -sS https://get.symfony.com/cli/installer | bash && mv ~/.symfony*/bin/symfony /usr/local/bin/symfony
+
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
-          extensions: pdo_pgsql
-          tools: symfony, composer
+          extensions: mbstring, intl, pdo_pgsql
           coverage: none
 
-      - name: Validate composer.json and composer.lock
-        run: composer validate
-
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
-
-      - name: Install dependencies
+      - name: Install Composer dependencies
         run: composer install --prefer-dist --no-progress
-
+      - name: Build Sass css
+        run: symfony console sass:build
+        
+      - name: Clear cache for test env
+        run: php bin/console cache:clear --env=test
+      
       - name: Generate random .env.test file
         run: |
           DB_NAME="testdb_$RANDOM"
@@ -70,8 +67,7 @@ jobs:
           psql -h localhost -U symfony -c "CREATE DATABASE \"$DB_NAME\";"
         env:
           PGPASSWORD: symfony
-
-      - name: Run tests
+      - name: Run test suite
         run: composer run test
 
       - name: Run PHPStan static analysis
