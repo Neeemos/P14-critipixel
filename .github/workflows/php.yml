@@ -52,3 +52,6 @@ jobs:
 
       - name: Run test suite
         run: composer run test
+
+      - name: Run PHPStan static analysis
+        run: php vendor/bin/phpstan analyse -l 6 src tests
