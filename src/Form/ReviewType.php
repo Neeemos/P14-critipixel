@@ -37,6 +37,8 @@ final class ReviewType extends AbstractType
                 'required' => false,
                 'attr' => [
                     'placeholder' => 'Commentaire',
+                    'minlength' => 10,
+                    'maxlength' => 200,
                 ]
             ]);
     }

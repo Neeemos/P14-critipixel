@@ -12,6 +12,7 @@ use Doctrine\ORM\Mapping\Id;
 use Doctrine\ORM\Mapping\JoinColumn;
 use Doctrine\ORM\Mapping\ManyToOne;
 use Symfony\Component\Validator\Constraints\Range;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[Entity]
 class Review
@@ -34,6 +35,13 @@ class Review
     private int $rating;
 
     #[Column(type: Types::TEXT, nullable: true)]
+    #[Assert\NotBlank(message: "Le commentaire ne peut pas être vide.")]
+    #[Assert\Length(
+        min: 10,
+        max: 200,
+        minMessage: "Le commentaire doit contenir au moins {{ limit }} caractères.",
+        maxMessage: "Le commentaire ne peut pas dépasser {{ limit }} caractères."
+    )]
     private ?string $comment = null;
 
     public function getId(): ?int

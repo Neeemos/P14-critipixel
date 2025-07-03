@@ -17,8 +17,8 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: symfony
-          POSTGRES_PASSWORD: symfony
+          POSTGRES_USER: ${{ secrets.DB_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
         ports: ['5432:5432']
         options: >-
           --health-cmd pg_isready
@@ -65,11 +65,11 @@ jobs:
           echo "SYMFONY_DEPRECATIONS_HELPER=999999" >> .env.test
           echo "PANTHER_APP_ENV=panther" >> .env.test
           echo "PANTHER_ERROR_SCREENSHOT_DIR=./var/error-screenshots" >> .env.test
-          echo "DATABASE_URL=postgresql://symfony:symfony@localhost:5432/$DB_NAME" >> .env.test
+          echo "DATABASE_URL=postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/$DB_NAME" >> .env.test
 
           echo "Creating PostgreSQL test database: $DB_NAME"
-          export PGPASSWORD=symfony
-          psql -h localhost -U symfony -c "CREATE DATABASE \"$DB_NAME\";"
+          export PGPASSWORD=${{ secrets.DB_PASSWORD }}
+          psql -h localhost -U ${{ secrets.DB_USER }} -c "CREATE DATABASE \"$DB_NAME\";"
         env:
           PGPASSWORD: symfony
 

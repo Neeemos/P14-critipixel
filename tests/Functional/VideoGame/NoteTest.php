@@ -80,6 +80,7 @@ final class NoteTest extends FunctionalTestCase
             'review' => [
                 'rating' => '5',
                 'comment' => 'Commentaire valide',
+                'token' => 'testtoken',
             ],
         ]);
 
