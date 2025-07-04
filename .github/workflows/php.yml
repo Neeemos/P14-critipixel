@@ -12,13 +12,18 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-
+      
+    env:
+      DB_USER: ${{ secrets.DB_USER }} 
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      
     services:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_USER: ${{ env.DB_USER }}  # Utiliser les variables d'environnement du job
+          POSTGRES_PASSWORD: ${{ env.DB_PASSWORD }}
+          POSTGRES_DB: test_db  # Base de données par défaut obligatoire
         ports: ['5432:5432']
         options: >-
           --health-cmd pg_isready
@@ -65,13 +70,11 @@ jobs:
           echo "SYMFONY_DEPRECATIONS_HELPER=999999" >> .env.test
           echo "PANTHER_APP_ENV=panther" >> .env.test
           echo "PANTHER_ERROR_SCREENSHOT_DIR=./var/error-screenshots" >> .env.test
-          echo "DATABASE_URL=postgresql://${{ secrets.DB_USER }}:${{ secrets.DB_PASSWORD }}@localhost:5432/$DB_NAME" >> .env.test
+          echo "DATABASE_URL=postgresql://${{ env.DB_USER }}:${{ env.DB_PASSWORD }}@localhost:5432/$DB_NAME?serverVersion=15" >> .env.test
 
           echo "Creating PostgreSQL test database: $DB_NAME"
-          export PGPASSWORD=${{ secrets.DB_PASSWORD }}
-          psql -h localhost -U ${{ secrets.DB_USER }} -c "CREATE DATABASE \"$DB_NAME\";"
-        env:
-          PGPASSWORD: ${{ secrets.DB_PASSWORD }}
+          export PGPASSWORD='${{ env.DB_PASSWORD }}'
+          psql -h localhost -U '${{ env.DB_USER }}' -c "CREATE DATABASE \"$DB_NAME\";"
 
       - name: Run tests
         run: composer run test
