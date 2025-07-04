@@ -57,14 +57,14 @@ final class NoteTest extends FunctionalTestCase
         $this->get('/jeu-video-0');
         self::assertResponseIsSuccessful();
 
-        $longComment = str_repeat('a', 1000000);
+        $longComment = str_repeat('a', 250);
 
         $this->client->submitForm('Poster', [
             'review[rating]' => '5',
             'review[comment]' => $longComment,
         ]);
 
-        self::assertResponseStatusCodeSame(302); /// Pb devrait être 422 trop long
+        self::assertResponseStatusCodeSame(422); 
     }
 
         public function testFormAddnoteViewUnlogin(): void
