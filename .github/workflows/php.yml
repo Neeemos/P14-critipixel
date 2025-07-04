@@ -92,3 +92,4 @@ jobs:
 
       - name: Run PHPStan static analysis
         run: php vendor/bin/phpstan analyse -l 6 src tests
+        
