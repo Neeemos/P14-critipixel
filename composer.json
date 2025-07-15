@@ -93,6 +93,10 @@
             "composer db-test",
             "symfony php bin/phpunit"
         ],
+        "analyse": [
+            "php vendor/bin/phpstan analyse -l 6 src tests",
+            "php vendor/bin/phpstan analyse -l 6 src src/Factory"
+        ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd",

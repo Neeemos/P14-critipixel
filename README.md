@@ -73,7 +73,11 @@ symfony console sass:build
 
 ### Tests
 ```bash
-symfony php bin/phpunit
+composer run test
+```
+### Analyse
+```bash
+composer run analyse
 ```
 
 *Note : Penser à charger les fixtures avant chaque éxécution des tests.*
